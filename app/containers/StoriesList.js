@@ -153,10 +153,6 @@ export default class StoriesList extends Component {
                     onUnhighlight={() => highlightRowFunc(null, null)}
                     story={story}
                 />);
-        return (<Image
-                    source={require('../images/splash.png')}
-                    style={{width: 100, height: 100}}
-                />);
     }
 
     onEndReached () {
