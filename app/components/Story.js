@@ -2,7 +2,6 @@
 
 import React, { Component, PropTypes } from 'react';
 import {
-    Image,
     PixelRatio,
     Platform,
     StyleSheet,
@@ -10,9 +9,16 @@ import {
     TouchableHighlight,
     TouchableNativeFeedback,
     View,
+    Image,
 } from 'react-native';
 
 export default class Story extends Component {
+    constructor(props) {
+        super(props);
+    
+        this.state = {};
+        this.updateReadState = this.updateReadState.bind(this);
+    }
     updateReadState () {
         this.refs['title'].setNativeProps({style: {color: '#777777'}});
         this.props.onSelect && this.props.onSelect();
@@ -27,7 +33,7 @@ export default class Story extends Component {
         if (story.images && story.images[0]) {
             image = (<Image
                         source={{uri: story.images[0]}}
-                        style={styles.cellImages}
+                        style={{width: 80, height: 60}}
                     />)
         }
 
@@ -38,21 +44,23 @@ export default class Story extends Component {
                         onHideUnderlay={onHighlight}
                     >
                         <View style={styles.row}>
-                            <Text
+                            {<Text
                                 ref="title"
                                 style={story.read ? styles.storyTitleRead : styles.storyTitle}
-                                numberOfLines={3}
+                                numberOfLines={2}
                             >
                                 {story.title}
-                            </Text>
+                            </Text>}
+
                             {image}
+
                         </View>
                     </TouchableElement>
                 </View>);
     }
 }
 
-var styles = StyleSheet.create({
+const styles = StyleSheet.create({
   storyTitle: {
     flex: 1,
     fontSize: 16,
@@ -77,11 +85,5 @@ var styles = StyleSheet.create({
     borderStyle: null,
     borderWidth: 0.5,
     borderRadius: 2,
-  },
-  cellImage: {
-    backgroundColor: '#dddddd',
-    height: 60,
-    marginLeft: 10,
-    width: 80,
-  },
+  }
 });

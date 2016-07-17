@@ -78,7 +78,6 @@ export default class StoriesList extends Component {
         const { themeId } = this.state;
         const list = stories.list[themeId];
 
-        console.log('renderHeader', theme);
         if (theme) {
             const themeId = theme ? theme.id : 0;
             const topData = dataCache.topDataForTheme[themeId];
@@ -115,6 +114,7 @@ export default class StoriesList extends Component {
     }
 
     getSectionTitle (str) {
+        console.log('getSectionTitle', str);
         const date = Util.parseDateFromYYYYMMDD(str);
         if (data.toDateString() == new Date().toDateString()) {
             return '今日热闻'
@@ -152,7 +152,11 @@ export default class StoriesList extends Component {
                     onHighlight={() => highlightRowFunc(sectionID, rowID)}
                     onUnhighlight={() => highlightRowFunc(null, null)}
                     story={story}
-                />)
+                />);
+        return (<Image
+                    source={require('../images/splash.png')}
+                    style={{width: 100, height: 100}}
+                />);
     }
 
     onEndReached () {
@@ -176,7 +180,6 @@ export default class StoriesList extends Component {
     }
 
     render () {
-        console.log('render StoriesList', this.props.stories);
         const { stories, theme } = this.props;
         const { themeId } = this.state;
         const list = stories.list[themeId] || {};
@@ -190,7 +193,7 @@ export default class StoriesList extends Component {
               dataSource={this.state.dataSource.cloneWithRows(list.stories || [])}
               renderRow={this.renderRow}
               onEndReached={this.onEndReached}
-            //   renderSectionHeader={this.renderSectionHeader}
+              // renderSectionHeader={this.renderSectionHeader}
               automaticallyAdjustContentInsets={false}
               keyboardDismissMode="on-drag"
               keyboardShouldPersistTaps={true}
