@@ -10,7 +10,7 @@ import {
     TouchableHighlight,
     TouchableNativeFeedback,
     View,
-} from 'react-ntive';
+} from 'react-native';
 
 export default class Story extends Component {
     updateReadState () {
@@ -18,7 +18,7 @@ export default class Story extends Component {
         this.props.onSelect && this.props.onSelect();
     }
     render () {
-        const TouchableElement = TouchableHighlight;
+        let TouchableElement = TouchableHighlight;
         if (Platform.OS == 'android') {
             TouchableElement = TouchableNativeFeedback
         }

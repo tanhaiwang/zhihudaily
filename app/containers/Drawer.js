@@ -38,7 +38,7 @@ export default class Drawer extends Component {
                         <TouchablueElement>
                             <View style={{flexDirection: 'row', alignItems: 'center', padding: 16}}>
                                 <Image
-                                    source={require('../images/commen_avatar.png')}
+                                    source={require('../images/comment_avatar.png')}
                                     style={{width: 40, height: 40, marginLeft: 8, marginRight: 8}}
                                 />
                                 <Text style={styles.menuText}>
@@ -50,7 +50,7 @@ export default class Drawer extends Component {
                             <TouchablueElement>
                                 <View style={styles.menuContainer}>
                                 <Image
-                                    source={require('../imagesic_favorites_white.png')}
+                                    source={require('../images/ic_favorites_white.png')}
                                     style={{width: 30, height: 30}}
                                 />
                                 <Text style={styles.menuText}>
@@ -61,7 +61,7 @@ export default class Drawer extends Component {
                             <TouchableElement>
                                 <View style={styles.menuContainer}>
                                     <Image
-                                        source={require('image!ic_download_white')}
+                                        source={require('../images/ic_download_white.png')}
                                         style={{width: 30, height: 30}}
                                     />
                                     <Text style={styles.menuText}>
@@ -74,7 +74,7 @@ export default class Drawer extends Component {
                     <TouchableElement onPress={() => this.props.onSelectItem(null)}>
                         <View style={styles.themeItem}>
                             <Image
-                                source={require('image!home')}
+                                source={require('../images/home.png')}
                                 style={{width: 30, height: 30, marginLeft: 10}}
                             />
                             <Text style={styles.homeTheme}>

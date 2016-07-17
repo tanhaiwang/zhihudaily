@@ -12,10 +12,10 @@ import {
     TouchableOpacity,
 } from 'react-native';
 
-import StoryItem from './StoryItem';
+import StoryItem from '../components/Story';
 import ThemeList from './Drawer';
 import ViewPager from 'react-native-viewpager';
-import StoryPage from '../pages/Story';
+// import StoryPage from '../pages/Story';
 
 export default class StoriesList extends Component {
     constructor (props) {
@@ -23,10 +23,10 @@ export default class StoriesList extends Component {
         this.state = {
             isLoading: false,
             isLoadingTail: false,
-            dataSource: new ListView.dataSource({
+            dataSource: new ListView.DataSource({
                 rowHasChanged: (row1, row2) => row1 !== row2
             }),
-            headerDataSource: new ViewPager.dataSource({
+            headerDataSource: new ViewPager.DataSource({
                 pageHasChanged: (p1, p2) => p1 !== p2
             }),
         }
@@ -96,7 +96,7 @@ export default class StoriesList extends Component {
 
     getSectionTitle (str) {
         const date = Util.parseDateFromYYYYMMDD(str);
-        if (data.toDateString() == new Date().toDateString)) {
+        if (data.toDateString() == new Date().toDateString()) {
             return '今日热闻'
         }
         let title = str.slice(4, 6) + '月' + str.slice(6, 8);
@@ -158,9 +158,9 @@ export default class StoriesList extends Component {
     render () {
         const { isLoading, dataSource } = this.state;
         const content = dataSource.getRowCount() == 0 ?
-            (<View style={styles.centerEmpty}><
+            (<View style={styles.centerEmpty}>
                 <Text>{isLoading ? '正在加载...' : '加载失败'}</Text>
-            /View>) :
+            </View>) :
             (<ListView
               ref="listview"
               style={styles.listview}

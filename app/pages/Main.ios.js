@@ -7,16 +7,17 @@ import {
     StyleSheet,
     Text,
     View,
-} from 'react';
+} from 'react-native';
 
 import Drawer from 'react-native-drawer';
-import StoriesList from '../containers/StoreList';
+import StoriesList from '../containers/StoriesList';
+import Theme from '../containers/Drawer';
 
 export default class MainIos extends Component {
     constructor (props) {
         super(props);
         this.state = {
-            theme: null
+            theme: 'dark'
         };
     }
 
@@ -28,11 +29,12 @@ export default class MainIos extends Component {
     render () {
         const Theme = <Theme onSelectItem={this.onSelectItem} />;
         return (<Drawer
-                    ref="drawer",
+                    ref="drawer"
                     openDrawerOffset={100}
                     panCloseMask={1}
-                    content={Theme}
-                    <StoriesList theme={theme} navigator={this.props.navigator}>
-                />);
+                    content={<View />}
+                >
+                    <StoriesList theme={this.state.theme} navigator={this.props.navigator} />
+                </Drawer>);
     }
 }

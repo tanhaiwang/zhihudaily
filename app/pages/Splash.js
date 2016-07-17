@@ -10,40 +10,45 @@ import {
     Dimensions,
     Animated,
     InteractionManager,
+    Platform,
+    Easing,
 } from 'react-native';
 
 const { width, height } = Dimensions.get('window');
-const Main from './Main';
+import MainIos from './Main.ios';
+import MainAndroid from './Main.android';
 
 export default class Splash extends Component {
-    constructor (props) {
+    constructor(props) {
         super(props);
         this.state = {
-            cover: null,
             bounceValue: new Animated.Value(1),
-        }
+        };
     }
 
-    componentDidMount () {
-        const { bounceValue } = this.state;
-        const { navigator } = this.props;
-        this.fetchData();
-        bounceValue.setValue(1);
-        Animated.timing(bounceValue, {
-            toValue: 1.2,
-            duration: 3000
-        }).start();
-        setTimeout(() => {
-            InteractionManager.runAfterInteractions(() => {
-				navigator.resetTo({
-					component: Main,
-					name: 'Main'
-				});
-			})
-        }, 3500);
-    }
+    componentDidMount() {
+        this.state.bounceValue.setValue(1);     // Start large
+        Animated.timing(this.state.bounceValue, {
+           toValue: 1.25,                         // Animate to smaller size
+           duration: 3000,                       // Bouncier spring
+       }).start();                               // Start the animation
+       let Main;
+       if (Platform.OS == 'android') {
+           Main = MainAndroid
+       } else {
+           Main = MainIos;
+       }
 
-    render () {
+       setTimeout(() => {
+           InteractionManager.runAfterInteractions(() => {
+       		this.props.navigator.resetTo({
+       			component: Main,
+       			name: 'Main'
+       		});
+       	})
+       }, 3500);
+   }
+    render() {
         let img, text;
         const { cover, bounceValue } = this.state;
         if (cover) {
@@ -53,19 +58,26 @@ export default class Splash extends Component {
             img  = require("../images/splash.png");
             text = '';
         }
-
         return (<View style={styles.container}>
-                    <Animated.Image
-                        source={img}
-                        style={[styles.cover, transfrom: [{scale: bounceValue}]]}
-                    />
-                    <Text style={styles.text}>
-                        {text}
-                    </Text>
-                    <Image style={styles.logo} source={require('../images/logo.png')} />
-                </View>)
-    }
+                  <Animated.Image                         // Base: Image, Text, View
+                    source={require("../images/splash.png")}
+                    style={{
+                      flex: 1,
+                      width: width,
+                      height: 1,
+                      transform: [                        // `transform` is an ordered array
+                        {scale: this.state.bounceValue},  // Map `bounceValue` to `scale`
+                      ]
+                    }}
+                  />
+                  <Text style={styles.text}>
+                      {text}
+                  </Text>
+                  <Image style={styles.logo} source={require('../images/splash_logo.png')} />
+                 </View>);
+     }
 }
+
 
 const styles = StyleSheet.create({
     container: {
