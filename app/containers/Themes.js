@@ -12,12 +12,15 @@ import {
     TouchableNativeFeedback,
     TouchableHighlight,
 } from 'react-native';
+import { connect } from 'react-redux';
+import {
+    fetchThemes
+} from '../actions'
 
-export default class Drawer extends Component {
+export class Themes extends Component {
     constructor (props) {
         super(props);
         this.state = {
-            isLoading: false,
             dataSource: new ListView.dataSource({
                 rowHasChanged: (row1, row2) => row1 !== row2,
             })
@@ -25,7 +28,7 @@ export default class Drawer extends Component {
     }
 
     componendDidMount () {
-        this.fetchThemes();
+        this.props.fetchThemes();
     }
 
     renderHeader () {
@@ -109,18 +112,43 @@ export default class Drawer extends Component {
     }
 
     render () {
-        return (<View style={styles.container} {...this.props}>
-                    <ListView
-                        ref="themes"
-                        dataSource={this.state.dataSource}
-                        renderRow={this.renderRow}
-                        automaticallyAdjustContentInsets={false}
-                        keyboardDismissMode="on-drag"
-                        keyboardShouldPersistTaps={true}
-                        showsVerticalScrollIndicator={false}
-                        renderHeader={this.renderHeader}
-                        style={{flex:1, backgroundColor: 'white'}}
-                    />
-                </View>)
+        const { themes } = this.props;
+        const { loading, list } = themes;
+        if (loading) {
+            return (<View style={styles.container}>
+                        <Text>loading...</Text>
+                    </View>)
+        } else {
+            return (<View style={styles.container} {...this.props}>
+                        <ListView
+                            ref="themes"
+                            dataSource={this.state.dataSource.cloneWithRows(list)}
+                            renderRow={this.renderRow}
+                            automaticallyAdjustContentInsets={false}
+                            keyboardDismissMode="on-drag"
+                            keyboardShouldPersistTaps={true}
+                            showsVerticalScrollIndicator={false}
+                            renderHeader={this.renderHeader}
+                            style={{flex:1, backgroundColor: 'white'}}
+                        />
+                    </View>);
+        }
     }
 }
+
+const mapStateToProps = (state, ownProps) => {
+    const { themes } = state;
+    return {
+        themes
+    }
+}
+
+const mapDispatchToProps = (dispath, ownProps) => {
+	return {
+        fetchThemes: () => {
+            dispath(fetchThemes())
+        }
+	}
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(Themes);

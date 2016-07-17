@@ -11,13 +11,13 @@ import {
 
 import Drawer from 'react-native-drawer';
 import StoriesList from '../containers/StoriesList';
-import Theme from '../containers/Drawer';
+import Themes from '../containers/Themes';
 
 export default class MainIos extends Component {
     constructor (props) {
         super(props);
         this.state = {
-            theme: 'dark'
+            theme: null
         };
     }
 
@@ -27,7 +27,7 @@ export default class MainIos extends Component {
     }
 
     render () {
-        const Theme = <Theme onSelectItem={this.onSelectItem} />;
+        const Theme = <Themes onSelectItem={this.onSelectItem} />;
         return (<Drawer
                     ref="drawer"
                     openDrawerOffset={100}

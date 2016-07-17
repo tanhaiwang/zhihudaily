@@ -32,7 +32,7 @@ export default class Story extends Component {
         }
 
         return (<View {...this.props}>
-                    <TouchablueElement
+                    <TouchableElement
                         onPress={this.updateReadState}
                         onShowUnderlay={onHighlight}
                         onHideUnderlay={onHighlight}
@@ -47,7 +47,7 @@ export default class Story extends Component {
                             </Text>
                             {image}
                         </View>
-                    </TouchablueElement>
+                    </TouchableElement>
                 </View>);
     }
 }

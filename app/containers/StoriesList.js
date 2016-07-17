@@ -11,18 +11,24 @@ import {
     View,
     TouchableOpacity,
 } from 'react-native';
+// import PureRenderMixin from 'react-addons-pure-render-mixin';
+import { connect } from 'react-redux';
+import {
+    fetchStories
+} from '../actions'
 
-import StoryItem from '../components/Story';
-import ThemeList from './Drawer';
+import Story from '../components/Story';
+import ThemeList from './Themes';
 import ViewPager from 'react-native-viewpager';
 // import StoryPage from '../pages/Story';
+import Util from '../common/util';
+
 
 export default class StoriesList extends Component {
     constructor (props) {
         super(props);
         this.state = {
-            isLoading: false,
-            isLoadingTail: false,
+            themeId: props.theme ? props.theme.id : 'latest',
             dataSource: new ListView.DataSource({
                 rowHasChanged: (row1, row2) => row1 !== row2
             }),
@@ -30,10 +36,20 @@ export default class StoriesList extends Component {
                 pageHasChanged: (p1, p2) => p1 !== p2
             }),
         }
+        // this.shouldComponentUpdate = PureRenderMixin.shouldComponentUpdate.bind(this);
+        this._renderHeader = this._renderHeader.bind(this);
+        this.selectStory = this.selectStory.bind(this);
+        this._renderPage = this._renderPage.bind(this);
+        this.renderSectionHeader = this.renderSectionHeader.bind(this);
+        this.selectStory = this.selectStory.bind(this);
     }
 
-    componendDidMount () {
-
+    componentDidMount () {
+        // theme is null, so we should get the latest stories
+        const { theme, stories, fetchStories } = this.props;
+        if (theme == undefined) {
+            fetchStories('latest', false);
+        }
     }
 
     componentWillUnmount () {
@@ -41,11 +57,12 @@ export default class StoriesList extends Component {
     }
 
     componentWillReceiveProps (nextProps) {
+        const { theme } = nextProps;
 
     }
     _renderPage (story, pageID) {
         return (<TouchableOpacity style={{flex: 1}} onPress={() => this.selectStory(story)} >
-                    <Image source={{uri: story.image}} style={style.headerItem}>
+                    <Image source={{uri: story.image}} style={styles.headerItem}>
                         <View style={styles.headerTitleContainer} >
                             <Text style={styles.headerTitle}
                                 numberOfLines={2}>
@@ -57,8 +74,11 @@ export default class StoriesList extends Component {
     }
 
     _renderHeader () {
-        const { theme } = this.props;
+        const { theme, stories } = this.props;
+        const { themeId } = this.state;
+        const list = stories.list[themeId];
 
+        console.log('renderHeader', theme);
         if (theme) {
             const themeId = theme ? theme.id : 0;
             const topData = dataCache.topDataForTheme[themeId];
@@ -76,7 +96,7 @@ export default class StoriesList extends Component {
                     {this._renderPage({image: topData.background, title: topData.description}, 0)}
                     <View style={styles.editors}>
                         <Text style={styles.editorsLable}>主编:</Text>
-                        {editorsAvator}
+                        {/*editorsAvator*/}
                     </View>
                 </View>
             );
@@ -84,7 +104,7 @@ export default class StoriesList extends Component {
             return (
                 <View style={{flex: 1, height: 200}}>
                     <ViewPager
-                      dataSource={this.state.headerDataSource}
+                      dataSource={this.state.headerDataSource.cloneWithPages(list.top_stories)}
                       style={styles.listHeader}
                       renderPage={this._renderPage}
                       isLoop={true}
@@ -136,11 +156,11 @@ export default class StoriesList extends Component {
     }
 
     onEndReached () {
-        console.log('onEndReached() ' + this.state.isLoadingTail);
-        if (this.state.isLoadingTail) {
-          return;
-        }
-        this.fetchStories(this.props.theme, false);
+        console.log('onEndReached() ' + this.state);
+        // if (this.state.isLoadingTail) {
+        //   return;
+        // }
+        // this.fetchStories(this.props.theme, false);
     }
 
     setTheme (theme) {
@@ -156,18 +176,21 @@ export default class StoriesList extends Component {
     }
 
     render () {
-        const { isLoading, dataSource } = this.state;
-        const content = dataSource.getRowCount() == 0 ?
+        console.log('render StoriesList', this.props.stories);
+        const { stories, theme } = this.props;
+        const { themeId } = this.state;
+        const list = stories.list[themeId] || {};
+        const content = !list.stories ?
             (<View style={styles.centerEmpty}>
-                <Text>{isLoading ? '正在加载...' : '加载失败'}</Text>
+                <Text>{stories.loading ? '正在加载...' : '加载失败'}</Text>
             </View>) :
             (<ListView
               ref="listview"
               style={styles.listview}
-              dataSource={this.state.dataSource}
+              dataSource={this.state.dataSource.cloneWithRows(list.stories || [])}
               renderRow={this.renderRow}
               onEndReached={this.onEndReached}
-              renderSectionHeader={this.renderSectionHeader}
+            //   renderSectionHeader={this.renderSectionHeader}
               automaticallyAdjustContentInsets={false}
               keyboardDismissMode="on-drag"
               keyboardShouldPersistTaps={true}
@@ -248,3 +271,20 @@ const styles = StyleSheet.create({
     margin: 4,
   }
 });
+
+const mapStateToProps = (state, ownProps) => {
+    const { stories } = state;
+    return {
+        stories
+    }
+}
+
+const mapDispatchToProps = (dispath, ownProps) => {
+	return {
+        fetchStories: (id, isRreshing) => {
+            dispath(fetchStories(id, isRreshing));
+        }
+	}
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(StoriesList);
