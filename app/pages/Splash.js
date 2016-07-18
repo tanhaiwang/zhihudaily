@@ -13,6 +13,11 @@ import {
     Platform,
     Easing,
 } from 'react-native';
+import { connect } from 'react-redux';
+import {
+    fetchThemes,
+    fetchStories
+} from '../actions'
 
 const { width, height } = Dimensions.get('window');
 import MainIos from './Main.ios';
@@ -31,14 +36,18 @@ export default class Splash extends Component {
         Animated.timing(this.state.bounceValue, {
            toValue: 1.25,                         // Animate to smaller size
            duration: 3000,                       // Bouncier spring
-       }).start();                               // Start the animation
+       }).start();                              // Start the animation
+
+        const { fetchStories, fetchThemes } = this.props;
+        fetchStories && fetchStories('latest', false);
+        fetchThemes && fetchThemes();
+        
        let Main;
        if (Platform.OS == 'android') {
            Main = MainAndroid
        } else {
            Main = MainIos;
        }
-
        setTimeout(() => {
            InteractionManager.runAfterInteractions(() => {
        		this.props.navigator.resetTo({
@@ -47,6 +56,7 @@ export default class Splash extends Component {
        		});
        	})
        }, 3500);
+
    }
     render() {
         let img, text;
@@ -109,4 +119,21 @@ const styles = StyleSheet.create({
         bottom: 10,
         backgroundColor: 'transparent',
     }
-})
+});
+
+const mapStateToProps = (state, ownProps) => {
+    return {}
+}
+
+const mapDispatchToProps = (dispath, ownProps) => {
+    return {
+        fetchStories: (id, isRreshing) => {
+            dispath(fetchStories(id, isRreshing));
+        },
+        fetchThemes: () => {
+            dispath(fetchThemes())
+        }
+    }
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(Splash);

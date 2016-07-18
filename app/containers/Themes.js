@@ -15,30 +15,32 @@ import {
 import { connect } from 'react-redux';
 import {
     fetchThemes
-} from '../actions'
+} from '../actions';
+import Loading from '../components/Loading';
 
 export class Themes extends Component {
     constructor (props) {
         super(props);
         this.state = {
-            dataSource: new ListView.dataSource({
+            dataSource: new ListView.DataSource({
                 rowHasChanged: (row1, row2) => row1 !== row2,
             })
         };
+        this.renderRow = this.renderRow.bind(this);
     }
 
-    componendDidMount () {
-        this.props.fetchThemes();
+    componentDidMount () {
+        // this.props.fetchThemes();
     }
 
     renderHeader () {
-        let TouchablueElement = TouchableHighlight;
+        let TouchableElement = TouchableHighlight;
         if (Platform.OS == 'android') {
-            TouchablueElement = TouchableNativeFeedback;
+            TouchableElement = TouchableNativeFeedback;
         }
         return (<View style={styles.header}>
                     <View style={styles.userInfo}>
-                        <TouchablueElement>
+                        <TouchableElement>
                             <View style={{flexDirection: 'row', alignItems: 'center', padding: 16}}>
                                 <Image
                                     source={require('../images/comment_avatar.png')}
@@ -48,9 +50,9 @@ export class Themes extends Component {
                                     请登录
                                 </Text>
                             </View>
-                        </TouchablueElement>
+                        </TouchableElement>
                         <View style={styles.row}>
-                            <TouchablueElement>
+                            <TouchableElement>
                                 <View style={styles.menuContainer}>
                                 <Image
                                     source={require('../images/ic_favorites_white.png')}
@@ -60,7 +62,7 @@ export class Themes extends Component {
                                     我的收藏
                                 </Text>
                                 </View>
-                            </TouchablueElement>
+                            </TouchableElement>
                             <TouchableElement>
                                 <View style={styles.menuContainer}>
                                     <Image
@@ -90,7 +92,7 @@ export class Themes extends Component {
 
     renderRow (theme, sectionId, rowId, highlightRowFunc) {
         const { onSelectItem } = this.props;
-        let TouchableElement = TouchableHighlight;
+        let TouchableElement   = TouchableHighlight;
         const icon = theme.subscribed ? require('../images/ic_menu_arrow.png') : require('../images/ic_menu_follow.png');
         return (<View>
                     <TouchableElement
@@ -104,7 +106,7 @@ export class Themes extends Component {
                             </Text>
                             <Image
                                 source={icon}
-                                style={style.themeIndicate}
+                                style={styles.themeIndicate}
                             />
                         </View>
                     </TouchableElement>
@@ -112,29 +114,97 @@ export class Themes extends Component {
     }
 
     render () {
-        const { themes } = this.props;
+        const { themes }        = this.props;
         const { loading, list } = themes;
+        const { dataSource }    = this.state;
         if (loading) {
             return (<View style={styles.container}>
-                        <Text>loading...</Text>
+                        <Loading />
                     </View>)
         } else {
-            return (<View style={styles.container} {...this.props}>
+            return (<View style={styles.container}>
                         <ListView
                             ref="themes"
-                            dataSource={this.state.dataSource.cloneWithRows(list)}
+                            // enableEmptySections
+                            dataSource={dataSource.cloneWithRows(list)}
                             renderRow={this.renderRow}
                             automaticallyAdjustContentInsets={false}
                             keyboardDismissMode="on-drag"
                             keyboardShouldPersistTaps={true}
                             showsVerticalScrollIndicator={false}
                             renderHeader={this.renderHeader}
-                            style={{flex:1, backgroundColor: 'white'}}
+                            style={{flex:1, backgroundColor: '#FAFAFA',}}
                         />
                     </View>);
         }
     }
 }
+
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#FAFAFA',
+  },
+  header: {
+    flex: 1,
+    flexDirection: 'column',
+  },
+  userInfo: {
+    flex: 1,
+    backgroundColor: '#00a2ed',
+  },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  menuContainer: {
+    flex:1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 8,
+  },
+  menuText: {
+    fontSize: 14,
+    color: 'white',
+  },
+  homeTheme: {
+    fontSize: 16,
+    marginLeft: 16,
+    color: '#00a2ed'
+  },
+  themeItem: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 10,
+  },
+  themeName: {
+    flex: 1,
+    fontSize: 16,
+    marginLeft: 16,
+  },
+  themeIndicate: {
+    marginRight: 16,
+    width: 16,
+    height: 16,
+  },
+  separator: {
+    height: 1,
+    backgroundColor: '#eeeeee',
+  },
+  scrollSpinner: {
+    marginVertical: 20,
+  },
+  rowSeparator: {
+    backgroundColor: 'rgba(0, 0, 0, 0.1)',
+    height: 1,
+    marginLeft: 4,
+  },
+  rowSeparatorHide: {
+    opacity: 0.0,
+  },
+});
 
 const mapStateToProps = (state, ownProps) => {
     const { themes } = state;

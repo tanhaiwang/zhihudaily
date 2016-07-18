@@ -55,9 +55,9 @@ export default class Toolbar extends Component {
     }
 
     render () {
-        let TouchablueElement = TouchableHighlight;
+        let TouchableElement = TouchableHighlight;
         if (Platform.OS === 'android') {
-            TouchablueElement = TouchableNativeFeedback;
+            TouchableElement = TouchableNativeFeedback;
         }
 
         return (<View {...this.props}>

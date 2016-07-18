@@ -14,14 +14,17 @@ import {
 // import PureRenderMixin from 'react-addons-pure-render-mixin';
 import { connect } from 'react-redux';
 import {
-    fetchStories
+    fetchStories,
+    openDrawer,
+    closeDrawer,
 } from '../actions'
 
 import Story from '../components/Story';
 import ThemeList from './Themes';
 import ViewPager from 'react-native-viewpager';
-// import StoryPage from '../pages/Story';
 import Util from '../common/util';
+import Loading from '../components/Loading';
+import StoryPage from '../pages/Story';
 
 
 export default class StoriesList extends Component {
@@ -42,14 +45,15 @@ export default class StoriesList extends Component {
         this._renderPage = this._renderPage.bind(this);
         this.renderSectionHeader = this.renderSectionHeader.bind(this);
         this.selectStory = this.selectStory.bind(this);
+        this.renderRow = this.renderRow.bind(this);
     }
 
     componentDidMount () {
         // theme is null, so we should get the latest stories
-        const { theme, stories, fetchStories } = this.props;
+       /* const { theme, stories, fetchStories } = this.props;
         if (theme == undefined) {
             fetchStories('latest', false);
-        }
+        }*/
     }
 
     componentWillUnmount () {
@@ -74,13 +78,13 @@ export default class StoriesList extends Component {
     }
 
     _renderHeader () {
-        const { theme, stories } = this.props;
+        const { theme, stories, openDrawer } = this.props;
         const { themeId } = this.state;
         const list = stories.list[themeId];
 
         if (theme) {
             const themeId = theme ? theme.id : 0;
-            const topData = dataCache.topDataForTheme[themeId];
+            const topData = stories.list[themeId];
             if (!topData) {
                 return null;
             }
@@ -95,7 +99,7 @@ export default class StoriesList extends Component {
                     {this._renderPage({image: topData.background, title: topData.description}, 0)}
                     <View style={styles.editors}>
                         <Text style={styles.editorsLable}>主编:</Text>
-                        {/*editorsAvator*/}
+                        {editorsAvator}
                     </View>
                 </View>
             );
@@ -107,14 +111,21 @@ export default class StoriesList extends Component {
                       style={styles.listHeader}
                       renderPage={this._renderPage}
                       isLoop={true}
-                      autoPlay={true} />
+                      autoPlay={true} 
+                    />
+                    
+                    <View style={styles.menuIcon}>
+                        <TouchableOpacity onPress={openDrawer}>
+                            <Image style={{width: 36, height: 36}} source={require('../images/ic_menu_white.png')} />
+                        </TouchableOpacity>
+                    </View>
+                    
                  </View>
             );
         }
     }
 
     getSectionTitle (str) {
-        console.log('getSectionTitle', str);
         const date = Util.parseDateFromYYYYMMDD(str);
         if (data.toDateString() == new Date().toDateString()) {
             return '今日热闻'
@@ -138,10 +149,12 @@ export default class StoriesList extends Component {
     selectStory (story) {
         story.read = true;
         const { navigator } = this.props;
+
         navigator.push({
             title: story.title,
             name: 'story',
             story: story,
+            component: StoryPage,
         });
     }
 
@@ -180,9 +193,7 @@ export default class StoriesList extends Component {
         const { themeId } = this.state;
         const list = stories.list[themeId] || {};
         const content = !list.stories ?
-            (<View style={styles.centerEmpty}>
-                <Text>{stories.loading ? '正在加载...' : '加载失败'}</Text>
-            </View>) :
+            (<Loading />) :
             (<ListView
               ref="listview"
               style={styles.listview}
@@ -268,13 +279,19 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#AAAAAA',
     margin: 4,
-  }
+  },
+  menuIcon: {
+    position: 'absolute',
+    top: 20,
+    left: 10
+  },
 });
 
 const mapStateToProps = (state, ownProps) => {
-    const { stories } = state;
+    const { stories, drawer } = state;
     return {
-        stories
+        stories,
+        drawer
     }
 }
 
@@ -282,6 +299,12 @@ const mapDispatchToProps = (dispath, ownProps) => {
 	return {
         fetchStories: (id, isRreshing) => {
             dispath(fetchStories(id, isRreshing));
+        },
+        openDrawer: () => {
+            dispath(openDrawer());
+        },
+        closeDrawer: () => {
+            dispath(closeDrawer());
         }
 	}
 };

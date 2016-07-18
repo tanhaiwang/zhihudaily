@@ -3,11 +3,16 @@ import {
     API_THEME_URL,
     API_THEMES_URL,
     API_LATEST_URL,
+    API_STORY_URL,
     KEY_THEME_TOPDATA,
     FETCH_STORIES_LIST,
     RECEIVE_STORIES_LIST,
     FETCH_THEMES_LIST,
     RECEIVE_THEMES_LIST,
+    OPEN_DRAWER,
+    CLOSE_DRAWER,
+    FETCH_STORY_DETAIL,
+    RECEIVE_STORY_DETAIL,
 } from '../constant';
 
 export function fetchStories (id, isRefreshing) {
@@ -48,7 +53,7 @@ export function fetchThemes () {
     return dispatch => {
         dispatch(fetchThemesList());
         return fetch(`${API_THEMES_URL}`)
-            .then(response => reponse.json())
+            .then(response => response.json())
             .then(list => {
                 dispatch(receiveThemesList(list.others))
             })
@@ -65,7 +70,48 @@ export function fetchThemesList () {
 export function receiveThemesList (list) {
     return {
         type: RECEIVE_THEMES_LIST,
-        loading: false,
+        loading: true,
         list,
+    }
+}
+
+export function openDrawer () {
+    return {
+        type: OPEN_DRAWER
+    }
+}
+
+export function closeDrawer () {
+    return {
+        type: CLOSE_DRAWER
+    }
+}
+
+export function fetchStory (id) {
+    return dispatch => {
+        dispatch(fetchStoryDetail(id));
+        console.log('fetchStory', `${API_STORY_URL}/${id}`);
+        return fetch(`${API_STORY_URL}/${id}`)
+            .then(response => response.json())
+            .then(detail => {
+                dispatch(receiveStoryDetail(id, detail));
+            })
+    }
+}
+
+export function fetchStoryDetail (id) {
+    return {
+        type: FETCH_STORY_DETAIL,
+        id,
+        loading: true
+    }
+}
+
+export function receiveStoryDetail (id, detail) {
+    return {
+        type: RECEIVE_STORY_DETAIL,
+        id,
+        loading: false,
+        detail
     }
 }
