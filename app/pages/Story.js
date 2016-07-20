@@ -39,21 +39,29 @@ export default class Story extends Component {
 
 
     render () {
-        console.log('Story', this.props);
         const { detail }   = this.props;
         const { story } = this.props.route
-        const storyDetail = detail[story.id] || {};
-        const { loading } = storyDetail;
-
-        if (loading || true) {
+        const storyDetail = detail[story.id];
+       
+        if (!storyDetail || storyDetail.loading) {
             return (<View style={styles.container}>
                         <Toolbar />
                         <Loading />
                     </View>)
         } else {
+             const HTML = `<!DOCTYPE html>
+                                <html>
+                                    <head>
+                                        <link rel="stylesheet" type="text/css" href="${storyDetail.detail.css[0]}/>"
+                                    </head>
+                                    <body>
+                                        ${storyDetail.detail.body}
+                                    </body>
+                                </html>`;
+
             return (<View style={styles.container}>
                         <Toolbar />
-                        <Animated.View style={[styles.header, {transform: [{translateY}]}]}>
+                        {<Animated.View style={[styles.header]}>
                             <Image
                                 ref="image"
                                 source={{uri: detail.image}}
@@ -65,8 +73,11 @@ export default class Story extends Component {
                                     </Text>
                                 </View>
                             </Image>
-                        </Animated.View>
-                        <WebView />
+                        </Animated.View>}
+                        <WebView 
+                            style={styles.content}
+                            source={{html: HTML}}
+                        />
                     </View>)
         }
     }
