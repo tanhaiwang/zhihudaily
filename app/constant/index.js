@@ -3,7 +3,7 @@ export const API_LATEST_URL = 'https://news-at.zhihu.com/api/4/news/latest';
 export const API_HOME_URL   = 'https://news.at.zhihu.com/api/4/news/before/';
 export const API_THEME_URL  = 'https://news-at.zhihu.com/api/4/theme';
 export const API_THEMES_URL = 'https://news-at.zhihu.com/api/4/themes';
-export const API_STORY_URL  = 'https://news.at.zhihu.com/api/4/news'
+export const API_STORY_URL  = 'http://news.at.zhihu.com/api/4/news'
 
 export const KEY_COVER         = '@Cover';
 export const KEY_THEMES        = '@Themes:';
