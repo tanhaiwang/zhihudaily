@@ -39,34 +39,45 @@ export default class Story extends Component {
 
 
     render () {
-        console.log('Story', this.props);
         const { detail }   = this.props;
         const { story } = this.props.route
-        const storyDetail = detail[story.id] || {};
-        const { loading } = storyDetail;
-
-        if (loading || true) {
+        let storyDetail = detail[story.id];
+       
+        if (!storyDetail || storyDetail.loading) {
             return (<View style={styles.container}>
                         <Toolbar />
                         <Loading />
                     </View>)
         } else {
+            storyDetail = storyDetail.detail;
+             const HTML = `<!DOCTYPE html>
+                                <html>
+                                    <head>
+                                        <link rel="stylesheet" type="text/css" href="${storyDetail.css[0]}/>"
+                                    </head>
+                                    <body>
+                                        ${storyDetail.body}
+                                    </body>
+                                </html>`;
+
             return (<View style={styles.container}>
-                        <Toolbar />
-                        <Animated.View style={[styles.header, {transform: [{translateY}]}]}>
+                        {<Animated.View style={styles.header}>
                             <Image
                                 ref="image"
-                                source={{uri: detail.image}}
+                                source={{uri: storyDetail.image}}
                                 style={styles.headerImage}
                             >
                                 <View style={styles.titleContainer}>
                                     <Text style={styles.title}>
-                                        {story.title}
+                                        {storyDetail.title}
                                     </Text>
                                 </View>
                             </Image>
-                        </Animated.View>
-                        <WebView />
+                        </Animated.View>}
+                        <WebView 
+                            style={styles.content}
+                            source={{html: HTML}}
+                        />
                     </View>)
         }
     }
