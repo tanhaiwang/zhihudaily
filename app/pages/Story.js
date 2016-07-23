@@ -61,7 +61,7 @@ export default class Story extends Component {
                                 </html>`;
 
             return (<View style={styles.container}>
-                        {<Animated.View style={styles.header}>
+                        { //<Animated.View style={styles.header}>
                             <Image
                                 ref="image"
                                 source={{uri: storyDetail.image}}
@@ -73,7 +73,8 @@ export default class Story extends Component {
                                     </Text>
                                 </View>
                             </Image>
-                        </Animated.View>}
+                        //</Animated.View>
+                        }
                         <WebView 
                             style={styles.content}
                             source={{html: HTML}}
