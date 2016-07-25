@@ -9,11 +9,15 @@ import {
 } from 'react-native';
 
 export default class LoadingView extends Component {
+	static defaultProps = {
+	  	size: 'large',
+	  	loadingText: '加载中...'
+	};
 	render () {
 		return (
 			 <View style={ styles.loading }>
-	          	<ActivityIndicator size='large'/>
-	          	<Text style={ styles.loadingText }>加载中...</Text>
+	          	<ActivityIndicator size={this.props.size}/>
+	          	<Text style={ styles.loadingText }>{this.props.loadingText}</Text>
 	        </View>
 		);
 	}

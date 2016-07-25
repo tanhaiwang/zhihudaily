@@ -11,6 +11,8 @@ import {
     RECEIVE_STORY_DETAIL
 } from '../constant';
 
+
+
 function stories (state = { loading: false, isRefreshing: false, list: {}}, action) {
     switch (action.type) {
         case FETCH_STORIES_LIST:
@@ -19,13 +21,25 @@ function stories (state = { loading: false, isRefreshing: false, list: {}}, acti
                 isRefreshing: action.isRefreshing,
             });
         case RECEIVE_STORIES_LIST:
+            let oldList = state.list[action.id] || [];
+            let exists = oldList.findIndex(item => {
+                return item.date == action.list.date;
+            })
+            if (exists !== -1) {
+                return state;
+            }
+            let newList = [...oldList, action.list].sort((a, b) => parseInt(b.date) - parseInt(a.date));
+
             const list = Object.assign(state.list, {
-                [action.id]: action.list
+                [action.id]: newList
             });
+
             return Object.assign({}, state, {
                 list,
-                loading: false
+                loading: false,
+                isRefreshing: false,
             });
+            
         default:
             return state;
     }

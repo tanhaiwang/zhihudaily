@@ -1,6 +1,6 @@
 export const API_COVER_URL  = "https://news-at.zhihu.com/api/4/start-image/1080*1776";
 export const API_LATEST_URL = 'https://news-at.zhihu.com/api/4/news/latest';
-export const API_HOME_URL   = 'https://news.at.zhihu.com/api/4/news/before/';
+export const API_HOME_URL   = 'http://news.at.zhihu.com/api/4/news/before';
 export const API_THEME_URL  = 'https://news-at.zhihu.com/api/4/theme';
 export const API_THEMES_URL = 'https://news-at.zhihu.com/api/4/themes';
 export const API_STORY_URL  = 'http://news.at.zhihu.com/api/4/news'
@@ -22,3 +22,6 @@ export const CLOSE_DRAWER = 'closeDrawer';
 
 export const FETCH_STORY_DETAIL   = 'fetchStoryDetail';
 export const RECEIVE_STORY_DETAIL = 'receiveStoryDetail';
+
+
+export const WEEKDAY = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
