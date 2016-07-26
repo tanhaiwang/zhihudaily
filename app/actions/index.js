@@ -3,6 +3,7 @@ import {
     API_THEME_URL,
     API_THEMES_URL,
     API_LATEST_URL,
+    API_HOME_URL,
     API_STORY_URL,
     KEY_THEME_TOPDATA,
     FETCH_STORIES_LIST,
@@ -15,14 +16,17 @@ import {
     RECEIVE_STORY_DETAIL,
 } from '../constant';
 
-export function fetchStories (id, isRefreshing) {
+export function fetchStories (id, isRefreshing, date) {
     let url = `${API_THEME_URL}/${id}`;
     if (id == 'latest') {
         url = API_LATEST_URL;
+        if (date) {
+            url = `${API_HOME_URL}/${date}`
+        }
     }
-
     return dispath => {
         dispath(fetchStoriesList(isRefreshing, false, id));
+
         return fetch(url)
             .then(response => response.json())
             .then(list => {
@@ -90,7 +94,6 @@ export function closeDrawer () {
 export function fetchStory (id) {
     return dispatch => {
         dispatch(fetchStoryDetail(id));
-        console.log('fetchStory', `${API_STORY_URL}/${id}`);
         return fetch(`${API_STORY_URL}/${id}`)
             .then(response => response.json())
             .then(detail => {

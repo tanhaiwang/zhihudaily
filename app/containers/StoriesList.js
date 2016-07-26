@@ -11,21 +11,23 @@ import {
     View,
     TouchableOpacity,
 } from 'react-native';
-// import PureRenderMixin from 'react-addons-pure-render-mixin';
+import PureRenderMixin from 'react-addons-pure-render-mixin';
 import { connect } from 'react-redux';
 import {
     fetchStories,
     openDrawer,
     closeDrawer,
-} from '../actions'
+} from '../actions';
+import {
+    WEEKDAY
+} from '../constant';
 
 import Story from '../components/Story';
 import ThemeList from './Themes';
 import ViewPager from 'react-native-viewpager';
-import Util from '../common/util';
+import * as Util from '../common/util';
 import Loading from '../components/Loading';
 import StoryPage from '../pages/Story';
-
 
 export default class StoriesList extends Component {
     constructor (props) {
@@ -33,31 +35,30 @@ export default class StoriesList extends Component {
         this.state = {
             themeId: props.theme ? props.theme.id : 'latest',
             dataSource: new ListView.DataSource({
-                rowHasChanged: (row1, row2) => row1 !== row2
+                rowHasChanged: (row1, row2) => row1 !== row2,
+                sectionHeaderHasChanged: (s1, s2) => s1 !== s2,
             }),
             headerDataSource: new ViewPager.DataSource({
                 pageHasChanged: (p1, p2) => p1 !== p2
             }),
         }
-        // this.shouldComponentUpdate = PureRenderMixin.shouldComponentUpdate.bind(this);
+        this.shouldComponentUpdate = PureRenderMixin.shouldComponentUpdate.bind(this);
         this._renderHeader = this._renderHeader.bind(this);
         this.selectStory = this.selectStory.bind(this);
         this._renderPage = this._renderPage.bind(this);
         this.renderSectionHeader = this.renderSectionHeader.bind(this);
         this.selectStory = this.selectStory.bind(this);
         this.renderRow = this.renderRow.bind(this);
+        this.onEndReached = this.onEndReached.bind(this);
+        this._renderFooter = this._renderFooter.bind(this);
     }
 
     componentDidMount () {
-        // theme is null, so we should get the latest stories
-       /* const { theme, stories, fetchStories } = this.props;
-        if (theme == undefined) {
-            fetchStories('latest', false);
-        }*/
+       
     }
 
     componentWillUnmount () {
-
+        // save data in to db
     }
 
     componentWillReceiveProps (nextProps) {
@@ -80,7 +81,7 @@ export default class StoriesList extends Component {
     _renderHeader () {
         const { theme, stories, openDrawer } = this.props;
         const { themeId } = this.state;
-        const list = stories.list[themeId];
+        const currentList = stories.list[themeId];
 
         if (theme) {
             const themeId = theme ? theme.id : 0;
@@ -107,7 +108,7 @@ export default class StoriesList extends Component {
             return (
                 <View style={{flex: 1, height: 200}}>
                     <ViewPager
-                      dataSource={this.state.headerDataSource.cloneWithPages(list.top_stories)}
+                      dataSource={this.state.headerDataSource.cloneWithPages(currentList[0].top_stories)}
                       style={styles.listHeader}
                       renderPage={this._renderPage}
                       isLoop={true}
@@ -125,9 +126,21 @@ export default class StoriesList extends Component {
         }
     }
 
+    _renderFooter () {
+        const { stories } = this.props;
+        const { isRefreshing } = stories;
+        if (isRefreshing) {
+            return (<View style={{height: 30, marginTop: 10}}>
+                        <Loading size="small" loadingText="正在加载数据..." />
+                      </View>)
+        } else {
+            return (<View />)
+        }
+    }
+
     getSectionTitle (str) {
-        const date = Util.parseDateFromYYYYMMDD(str);
-        if (data.toDateString() == new Date().toDateString()) {
+        const date = Util.parseDateFromYYYYMMdd(str);
+        if (date.toDateString() == new Date().toDateString()) {
             return '今日热闻'
         }
         let title = str.slice(4, 6) + '月' + str.slice(6, 8);
@@ -169,11 +182,12 @@ export default class StoriesList extends Component {
     }
 
     onEndReached () {
-        console.log('onEndReached() ' + this.state);
-        // if (this.state.isLoadingTail) {
-        //   return;
-        // }
-        // this.fetchStories(this.props.theme, false);
+        const { theme, fetchStories, stories } = this.props;
+        let currentList;
+        if (theme == null) {
+            currentList = stories.list['latest'];
+            fetchStories('latest', true, currentList[currentList.length - 1].date);
+        }
     }
 
     setTheme (theme) {
@@ -191,21 +205,35 @@ export default class StoriesList extends Component {
     render () {
         const { stories, theme } = this.props;
         const { themeId } = this.state;
-        const list = stories.list[themeId] || {};
-        const content = !list.stories ?
+        const currentList = stories.list[themeId] || [];
+        let newDateBold   = {};
+        let newSectionIDs = [];
+        let listData = currentList.map(item => {
+               return {
+                    date: item.date, 
+                    stories: item.stories
+                };
+            });
+        listData.map(item => {
+            newSectionIDs.push(item.date);
+            newDateBold[item.date] = item.stories;
+        });
+        console.log('currentList', currentList);
+        const content = !currentList.length ?
             (<Loading />) :
             (<ListView
               ref="listview"
               style={styles.listview}
-              dataSource={this.state.dataSource.cloneWithRows(list.stories || [])}
+              dataSource={this.state.dataSource.cloneWithRowsAndSections(newDateBold, newSectionIDs, null)}
               renderRow={this.renderRow}
               onEndReached={this.onEndReached}
-              // renderSectionHeader={this.renderSectionHeader}
+              renderSectionHeader={this.renderSectionHeader}
               automaticallyAdjustContentInsets={false}
               keyboardDismissMode="on-drag"
               keyboardShouldPersistTaps={true}
               showsVerticalScrollIndicator={false}
               renderHeader={this._renderHeader}
+              renderFooter={this._renderFooter}
             />);
         return content;
     }
@@ -297,8 +325,8 @@ const mapStateToProps = (state, ownProps) => {
 
 const mapDispatchToProps = (dispath, ownProps) => {
 	return {
-        fetchStories: (id, isRreshing) => {
-            dispath(fetchStories(id, isRreshing));
+        fetchStories: (id, isRreshing, date) => {
+            dispath(fetchStories(id, isRreshing, date));
         },
         openDrawer: () => {
             dispath(openDrawer());
