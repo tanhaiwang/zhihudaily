@@ -30,7 +30,7 @@ export class Themes extends Component {
     }
 
     componentDidMount () {
-        // this.props.fetchThemes();
+        
     }
 
     renderHeader () {

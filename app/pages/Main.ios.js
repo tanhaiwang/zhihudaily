@@ -33,13 +33,11 @@ export default class MainIos extends Component {
     }
 
     componentDidMount () {
-       /* setTimeout(() => {
-            this.refs['drawer'].open();
-        }, 1000)*/
+       
     }
 
     render () {
-
+        const { theme } = this.state;
         return (<Drawer
                     type="overlay"
                     ref="drawer"
@@ -51,7 +49,7 @@ export default class MainIos extends Component {
                     onClose={this.props.closeDrawer}
                     content={<Themes onSelectItem={this.onSelectItem} />}
                 >
-                    <StoriesList theme={this.state.theme} navigator={this.props.navigator} />
+                    <StoriesList theme={theme} navigator={this.props.navigator} />
                 </Drawer>);
     }
 }
