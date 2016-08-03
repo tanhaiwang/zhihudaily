@@ -3,15 +3,14 @@ import { combineReducers } from 'redux';
 import {
     FETCH_THEMES_LIST,
     RECEIVE_THEMES_LIST,
+    RECEIVE_THEME_STORIES_LIST,
     FETCH_STORIES_LIST,
     RECEIVE_STORIES_LIST,
     OPEN_DRAWER,
     CLOSE_DRAWER,
     FETCH_STORY_DETAIL,
-    RECEIVE_STORY_DETAIL
+    RECEIVE_STORY_DETAIL,
 } from '../constant';
-
-
 
 function stories (state = { loading: false, isRefreshing: false, list: {}}, action) {
     switch (action.type) {
@@ -39,7 +38,34 @@ function stories (state = { loading: false, isRefreshing: false, list: {}}, acti
                 loading: false,
                 isRefreshing: false,
             });
-            
+        case RECEIVE_THEME_STORIES_LIST: 
+            oldList = state.list[action.id];
+            if (!oldList) {
+                return Object.assign({}, state, {
+                    list: Object.assign(state.list, {
+                        [action.id]: Object.assign(action.list, {
+                            lastId: action.lastId
+                        })
+                    }),
+                    loading: false,
+                    isRefreshing: false,
+                })
+            }
+            if (oldList.lastId == action.lastId) {
+                return state;
+            }
+            newList = Object.assign(oldList, {
+                stories: [...oldList.stories, ...action.list.stories],
+                lastId: action.lastId
+            });
+            return Object.assign({}, state, {
+                list: Object.assign(state.list, {
+                    [action.id]: newList
+                }),
+                loading: false,
+                isRefreshing: false,
+            });
+
         default:
             return state;
     }

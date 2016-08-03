@@ -16,6 +16,8 @@ import Themes from '../containers/Themes';
 
 import {
     closeDrawer,
+    openDrawer,
+    fetchStories,
 } from '../actions'
 
 export default class MainIos extends Component {
@@ -30,6 +32,8 @@ export default class MainIos extends Component {
     onSelectItem (theme) {
         this.refs['drawer'].close();
         this.setState({theme: theme});
+        // 请求数据
+        this.props.fetchStories(theme.id, false);
     }
 
     componentDidMount () {
@@ -65,7 +69,13 @@ const mapDispatchToProps = (dispath, ownProps) => {
     return {
         closeDrawer: () => {
             dispath(closeDrawer());
-        }
+        },
+        openDrawer: () => {
+            dispath(openDrawer());
+        },
+        fetchStories: (id, isRreshing, date) => {
+            dispath(fetchStories(id, isRreshing, date));
+        },
     }
 };
 

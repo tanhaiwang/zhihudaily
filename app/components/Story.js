@@ -63,11 +63,13 @@ export default class Story extends Component {
 const styles = StyleSheet.create({
   storyTitle: {
     flex: 1,
+    height: 60,
     fontSize: 16,
     color: '#333333',
   },
   storyTitleRead: {
     flex: 1,
+    height: 60,
     fontSize: 16,
     color: '#777777',
   },

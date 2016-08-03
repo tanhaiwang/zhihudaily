@@ -14,6 +14,7 @@ import {
     CLOSE_DRAWER,
     FETCH_STORY_DETAIL,
     RECEIVE_STORY_DETAIL,
+    RECEIVE_THEME_STORIES_LIST,
 } from '../constant';
 
 export function fetchStories (id, isRefreshing, date) {
@@ -23,6 +24,10 @@ export function fetchStories (id, isRefreshing, date) {
         if (date) {
             url = `${API_HOME_URL}/${date}`
         }
+    } else {
+        if (date) {
+            url = `${url}/before/${date}`
+        }
     }
     return dispath => {
         dispath(fetchStoriesList(isRefreshing, false, id));
@@ -30,7 +35,12 @@ export function fetchStories (id, isRefreshing, date) {
         return fetch(url)
             .then(response => response.json())
             .then(list => {
-                dispath(receiveStoriesList(list, id))
+                if (id == 'latest') {
+                    dispath(receiveStoriesList(list, id))
+                } else {
+                    dispath(receiveThemeStoriesList(list, id))
+                }
+                
             })
     }
 }
@@ -41,6 +51,15 @@ export function fetchStoriesList (isRefreshing, loading, id) {
         isRefreshing,
         loading,
         id
+    }
+}
+
+export function receiveThemeStoriesList (list, id) {
+    return {
+        type: RECEIVE_THEME_STORIES_LIST,
+        id,
+        list,
+        lastId: list.stories[list.stories.length - 1].id
     }
 }
 

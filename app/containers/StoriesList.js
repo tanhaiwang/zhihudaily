@@ -28,6 +28,9 @@ import ViewPager from 'react-native-viewpager';
 import * as Util from '../common/util';
 import Loading from '../components/Loading';
 import StoryPage from '../pages/Story';
+import Icon from 'react-native-vector-icons/FontAwesome';
+
+const { width, height } = Dimensions.get('window');
 
 export default class StoriesList extends Component {
     constructor (props) {
@@ -78,32 +81,58 @@ export default class StoriesList extends Component {
                 </TouchableOpacity>);
     }
 
+    _renderThemeHeader (story) {
+        return (<View style={styles.themeHeader}>
+                    <View>
+                        <Image style={styles.bg} source={{uri: story.background}}/>
+                        <View style={styles.headerTop}>
+                            <View style={{marginLeft: 10}}>
+                                <TouchableOpacity
+                                    style={{flex: 1}} 
+                                    onPress={this.props.openDrawer}
+                                >
+                                <Icon name="angle-left" size={30} color="#fff" />
+                            </TouchableOpacity>
+                            </View>
+                            
+                            <Text style={{color: '#fff', fontSize: 20}}>{story.name}</Text>
+                            <View style={{marginRight: 10}}>
+                                <TouchableOpacity
+                                    style={{flex: 1}} 
+                                    onPress={this.addTheme}
+                                >   
+                                    <Icon name="plus-circle" size={30} color="#fff" />
+                                </TouchableOpacity>
+                            </View>
+                            
+                        </View>
+                    </View>
+                    <View style={styles.row}>
+                        <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                            <Text style={{fontSize: 14, color: '#888888',marginLeft: 6}}>主编</Text>
+                            {story.editors.map((item, index) => {
+                                return (<Image key={item.id} source={{uri: item.avatar}} style={styles.avatar}/>);
+                            })}
+                        </View>
+                        <View>
+                            <Icon name="angle-right" size={30} color="#ccc" />
+                        </View>
+                    </View>
+                </View>)
+    }
+
     _renderHeader () {
         const { theme, stories, openDrawer } = this.props;
-        const { themeId } = this.state;
-        const currentList = stories.list[themeId];
+        let { themeId } = this.state;
+        let currentList = stories.list[themeId];
 
         if (theme) {
-            const themeId = theme ? theme.id : 0;
-            const topData = stories.list[themeId];
-            if (!topData) {
+            themeId = theme.id;
+            currentList = stories.list[themeId];
+            if (!currentList) {
                 return null;
             }
-            let editorsAvator = [];
-            if (topData.editors) {
-                topData.editors.forEach((editor) => {
-                    editorsAvator.push(<Image style={styles.editorAvatar} source={{uri: editor.avatar}} />);
-                })
-            }
-            return (
-                <View style={{flex: 1}}>
-                    {this._renderPage({image: topData.background, title: topData.description}, 0)}
-                    <View style={styles.editors}>
-                        <Text style={styles.editorsLable}>主编:</Text>
-                        {editorsAvator}
-                    </View>
-                </View>
-            );
+            return this._renderThemeHeader(currentList);
         } else {
             return (
                 <View style={{flex: 1, height: 200}}>
@@ -184,10 +213,15 @@ export default class StoriesList extends Component {
     onEndReached () {
         const { theme, fetchStories, stories } = this.props;
         let currentList;
+        if (stories.loading || stories.isRefreshing) {
+            return;
+        }
         if (theme == null) {
             currentList = stories.list['latest'];
-            fetchStories('latest', true, currentList[currentList.length - 1].date);
+            return fetchStories('latest', true, currentList[currentList.length - 1].date);
         }
+        currentList = stories.list[theme.id];
+        fetchStories(theme.id, true, currentList.lastId);
     }
 
     setTheme (theme) {
@@ -205,26 +239,37 @@ export default class StoriesList extends Component {
     render () {
         const { stories, theme } = this.props;
         const { themeId } = this.state;
-        const currentList = stories.list[themeId] || [];
-        let newDateBold   = {};
-        let newSectionIDs = [];
-        let listData = currentList.map(item => {
-               return {
-                    date: item.date, 
-                    stories: item.stories
-                };
+        let currentList = stories.list[themeId] || [];
+        let dataSource;
+        if (theme) {
+            currentList = stories.list[theme.id];
+            if (currentList == undefined) {
+                return (<Loading />);
+            }
+            dataSource = this.state.dataSource.cloneWithRows(currentList.stories);
+        } else {
+            let newDateBold   = {};
+            let newSectionIDs = [];
+            let listData = currentList.map(item => {
+                   return {
+                        date: item.date, 
+                        stories: item.stories
+                    };
+                });
+            listData.map(item => {
+                newSectionIDs.push(item.date);
+                newDateBold[item.date] = item.stories;
             });
-        listData.map(item => {
-            newSectionIDs.push(item.date);
-            newDateBold[item.date] = item.stories;
-        });
-        console.log('currentList', currentList);
-        const content = !currentList.length ?
+            dataSource = this.state.dataSource.cloneWithRowsAndSections(newDateBold, newSectionIDs, null)
+        }
+
+        
+        const content = currentList.length == 0 ?
             (<Loading />) :
             (<ListView
               ref="listview"
               style={styles.listview}
-              dataSource={this.state.dataSource.cloneWithRowsAndSections(newDateBold, newSectionIDs, null)}
+              dataSource={dataSource}
               renderRow={this.renderRow}
               onEndReached={this.onEndReached}
               renderSectionHeader={this.renderSectionHeader}
@@ -290,29 +335,44 @@ const styles = StyleSheet.create({
     color: 'white',
     marginBottom: 10,
   },
-  editors: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 8,
-  },
-  editorsLable: {
-    fontSize: 14,
-    color: '#888888',
-  },
-  editorAvatar: {
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    borderWidth: 1,
-    borderColor: '#AAAAAA',
-    margin: 4,
-  },
   menuIcon: {
     position: 'absolute',
     top: 20,
     left: 10
   },
+  themeHeader: {
+    flexDirection: 'column'
+  },
+  headerTop: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: 'transparent',
+    position: 'absolute',
+    width: width,
+    top: 20,
+    left: 0
+  },
+  bg: {
+    flex: 1,
+    width: width,
+    height: 60,
+  },
+  row: {
+    padding: 5,
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    flexDirection: 'row',
+    justifyContent: 'space-between'
+  },
+  avatar: {
+    borderRadius: 15,
+    width: 30,
+    height: 30,
+    marginRight: 5,
+    marginLeft: 5,
+  }
 });
 
 const mapStateToProps = (state, ownProps) => {

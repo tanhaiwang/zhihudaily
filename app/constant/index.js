@@ -13,6 +13,7 @@ export const KEY_THEME_TOPDATA = '@ThemeTop:';
 
 export const FETCH_STORIES_LIST   = 'fetchStoriesList';
 export const RECEIVE_STORIES_LIST = 'receiveStoriesList';
+export const RECEIVE_THEME_STORIES_LIST = 'receiveThemeStoriesList';
 
 export const FETCH_THEMES_LIST   = 'fetchThemesList';
 export const RECEIVE_THEMES_LIST = 'receiveThemesList';
